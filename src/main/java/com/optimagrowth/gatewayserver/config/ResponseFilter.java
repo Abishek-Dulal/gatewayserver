@@ -17,17 +17,17 @@ public class ResponseFilter {
 
     final Logger logger = LoggerFactory.getLogger(ResponseFilter.class);
 
-    @Autowired
-    FilterUtils filterUtils;
 
     @Bean
-    public GlobalFilter postGlobalFilter(){
-        return ((exchange, chain) -> {
-            return chain.filter(exchange).then(Mono.fromRunnable(()->{
-                filterUtils
-
-            }));
-        });
+    public GlobalFilter postGlobalFilter(FilterUtils filterUtils){
+        return ((exchange, chain) -> chain.filter(exchange).then(Mono.fromRunnable(()->{
+                HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
+                String correlationId = filterUtils.getCorrelationId(requestHeaders);
+                logger.debug("Adding the correlation id  to the outbound header {}", correlationId);
+                exchange.getResponse().getHeaders().add(FilterUtils.CORRELATION_ID,correlationId);
+                logger.debug("Completing  outgoing  request {}", exchange.getRequest().getURI());
+            }))
+        );
     }
 
 }
