@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    config:
+      import: configserver:http://127.0.0.1:8071
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: organisation-service
+          uri: lb://organization-service
+          predicates:
+            - Path=/organisation/**
+          filters:
+            - RewritePath=/organization/(?<path>.*), /$\{path}
+
+
+
